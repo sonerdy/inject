@@ -1,6 +1,6 @@
 defmodule InjectTest do
   use ExUnit.Case
-  import Inject, only: [i: 1, register: 2]
+  import Inject
   doctest Inject
 
   defmodule ExampleModule do
@@ -63,21 +63,21 @@ defmodule InjectTest do
     end
   end
 
-  # TODO implement allowing other processes
-  # describe "when allowing another process" do
-  # test "it injects dependencies within another process" do
-  # test_pid = self()
-  # pid = spawn fn ->
-  # receive do
-  # :go -> send test_pid, i(ExampleModule).hello()
-  # end
-  # end
+  describe "when registering in shared mode" do
+    test "it allows any other processes to use the registration" do
+      test_pid = self()
 
-  # register(ExampleModule, StubModule)
-  # allow(pid)
+      pid =
+        spawn(fn ->
+          receive do
+            :go -> send(test_pid, i(ExampleModule).hello())
+          end
+        end)
 
-  # send pid, :go
-  # assert_receive "stubbed"
-  # end
-  # end
+      register(ExampleModule, StubModule, shared: true)
+
+      send(pid, :go)
+      assert_receive "stubbed"
+    end
+  end
 end

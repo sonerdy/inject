@@ -34,7 +34,7 @@ defmodule MyApplication do
 end
 ```
 
-- `register/2`. Use this function in your tests to register a stubbed implementation for a module.
+- `register/2` `register/3`. Use this function in your tests to register a stubbed implementation for a module.
 
 ```elixir
 defmodule MyApplicationTest do
@@ -66,6 +66,14 @@ defmodule MyApplicationTest do
     {:ok, nil} = MyApplication.process()
   end
 end
+```
+
+### Shared Mode
+If you want to inject a dependency that will be shared by all processes, you can do so by passing the `shared: true` option.
+This can be useful if you have background processing. This is only recommended for tests that do not run async.
+
+```elixir
+register(File, FileStub, shared: true)
 ```
 
 ## TODO
