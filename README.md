@@ -7,7 +7,7 @@ Inject is a library that lets you write testable Elixir code that can run concur
 ```elixir
 def deps do
   [
-    {:inject, "~> 0.2.0"}
+    {:inject, "~> 0.2.1"}
   ]
 end
 ```

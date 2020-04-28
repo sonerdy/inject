@@ -2,9 +2,7 @@ defmodule Inject.Application do
   use Application
 
   def start(_type, _args) do
-    children = [
-      {Registry, [keys: :unique, name: Inject.Registry]}
-    ]
+    children = [Inject]
 
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Inject.Supervisor]
