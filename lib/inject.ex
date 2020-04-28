@@ -35,6 +35,9 @@ defmodule Inject do
       end
 
     new_registrations = Map.put(registrations, module, new_mod_registrations)
+
+    Process.monitor(pid)
+
     {:reply, {:ok, mod_registrations}, new_registrations}
   end
 
@@ -46,6 +49,36 @@ defmodule Inject do
         module
 
     {:reply, {:ok, result}, registrations}
+  end
+
+  @impl true
+  def handle_info(args, state) do
+    new_state =
+      case args do
+        {:DOWN, _ref, :process, pid, _} -> clean_registrations(state, pid)
+        _ -> state
+      end
+
+    {:noreply, new_state}
+  end
+
+  defp clean_registrations(registrations, pid) do
+    Enum.reduce(registrations, %{}, fn {key, value}, acc ->
+      module_registrations = clean_module_registrations(value, pid)
+
+      case module_registrations do
+        %{} -> acc
+        _ -> Map.put(acc, key, module_registrations)
+      end
+    end)
+  end
+
+  defp clean_module_registrations(registrations, pid) do
+    case Map.get(registrations, :shared) do
+      {^pid, _} -> Map.delete(registrations, :shared)
+      _ -> registrations
+    end
+    |> Map.delete(pid)
   end
 
   defp lookup_registered(registrations, module, pid) do
