@@ -63,46 +63,6 @@ defmodule InjectTest do
     end
   end
 
-  test "avoids the :already_registered error" do
-    test_pid = self()
-
-    # register a bunch of times to get the :already_registered error to happen
-    pid1 =
-      spawn(fn ->
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-
-        receive do
-          :go -> send(test_pid, {:first, i(ExampleModule).hello()})
-        end
-      end)
-
-    pid2 =
-      spawn(fn ->
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-
-        receive do
-          :go -> send(test_pid, {:second, i(ExampleModule).hello()})
-        end
-      end)
-
-    send(pid1, :go)
-    send(pid2, :go)
-
-    assert_receive {:first, "stubbed"}
-    assert_receive {:second, "stubbed2"}
-  end
-
   describe "when registering in shared mode" do
     test "it allows any other processes to use the registration" do
       test_pid = self()
@@ -118,6 +78,32 @@ defmodule InjectTest do
 
       send(pid, :go)
       assert_receive "stubbed"
+    end
+  end
+
+  describe "when a registering process dies" do
+    test "it cleans up registrations made by that process" do
+      pid =
+        spawn(fn ->
+          register(ExampleModule, StubModule)
+        end)
+
+      wait_for(fn -> Process.alive?(pid) == false end)
+
+      result =
+        :sys.get_state(Inject)
+        |> Map.get(ExampleModule, %{})
+        |> Map.get(pid)
+
+      assert result == nil
+    end
+
+    defp wait_for(condition) do
+      if condition.() do
+        :ok
+      else
+        wait_for(condition)
+      end
     end
   end
 end
