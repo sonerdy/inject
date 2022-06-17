@@ -1,7 +1,10 @@
 defmodule Inject do
   def register(source_module, inject_module, opts \\ []) do
     shared = opts |> Keyword.get(:shared, false)
-    {:ok, _} = Registry.register(Inject.Registry, source_module, {inject_module, [shared: shared]})
+
+    {:ok, _} =
+      Registry.register(Inject.Registry, source_module, {inject_module, [shared: shared]})
+
     :ok
   end
 
