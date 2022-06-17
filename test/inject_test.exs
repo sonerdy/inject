@@ -80,4 +80,36 @@ defmodule InjectTest do
       assert_receive "stubbed"
     end
   end
+
+  describe "when registering the same module in separate processes" do
+    test "they don't share the same registrations" do
+      test_pid = self()
+
+      pid1 =
+        spawn(fn ->
+          receive do
+            :go ->
+              register(ExampleModule, StubModule)
+              result = i(ExampleModule).hello()
+              send(test_pid, result)
+          end
+        end)
+
+      pid2 =
+        spawn(fn ->
+          receive do
+            :go ->
+              register(ExampleModule, StubModule2)
+              result = i(ExampleModule).hello()
+              send(test_pid, result)
+          end
+        end)
+
+      send(pid1, :go)
+      send(pid2, :go)
+
+      assert_receive "stubbed"
+      assert_receive "stubbed2"
+    end
+  end
 end

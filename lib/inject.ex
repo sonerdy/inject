@@ -1,11 +1,7 @@
 defmodule Inject do
   def register(source_module, inject_module, opts \\ []) do
     shared = opts |> Keyword.get(:shared, false)
-    :ok = Registry.unregister(Inject.Registry, source_module)
-
-    {:ok, _} =
-      Registry.register(Inject.Registry, source_module, {inject_module, [shared: shared]})
-
+    {:ok, _} = Registry.register(Inject.Registry, source_module, {inject_module, [shared: shared]})
     :ok
   end
 
@@ -19,6 +15,7 @@ defmodule Inject do
     else
       Inject.Registry
       |> Registry.lookup(mod)
+      |> Enum.reverse()
       |> find_override() || mod
     end
   end

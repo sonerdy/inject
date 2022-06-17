@@ -3,7 +3,7 @@ defmodule Inject.Application do
 
   def start(_type, _args) do
     children = [
-      {Registry, [keys: :unique, name: Inject.Registry]}
+      {Registry, [keys: :duplicate, name: Inject.Registry]}
     ]
 
     # for other strategies and supported options
