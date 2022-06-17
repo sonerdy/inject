@@ -63,46 +63,6 @@ defmodule InjectTest do
     end
   end
 
-  test "avoids the :already_registered error" do
-    test_pid = self()
-
-    # register a bunch of times to get the :already_registered error to happen
-    pid1 =
-      spawn(fn ->
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-
-        receive do
-          :go -> send(test_pid, {:first, i(ExampleModule).hello()})
-        end
-      end)
-
-    pid2 =
-      spawn(fn ->
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-        register(ExampleModule, StubModule)
-        register(ExampleModule, StubModule2)
-
-        receive do
-          :go -> send(test_pid, {:second, i(ExampleModule).hello()})
-        end
-      end)
-
-    send(pid1, :go)
-    send(pid2, :go)
-
-    assert_receive {:first, "stubbed"}
-    assert_receive {:second, "stubbed2"}
-  end
-
   describe "when registering in shared mode" do
     test "it allows any other processes to use the registration" do
       test_pid = self()
