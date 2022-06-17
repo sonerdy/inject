@@ -21,6 +21,12 @@ defmodule InjectTest do
     end
   end
 
+  defmodule IOStub do
+    def read!(_filename) do
+      "file contents"
+    end
+  end
+
   describe "when not registering a dependency" do
     test "it uses the source module" do
       assert "unstubbed" = i(ExampleModule).hello()
@@ -109,6 +115,38 @@ defmodule InjectTest do
       send(pid2, :go)
 
       assert_receive "stubbed"
+      assert_receive "stubbed2"
+    end
+  end
+
+  describe "when registering more than one dependency" do
+    test "they work" do
+      test_pid = self()
+
+      pid1 =
+        spawn(fn ->
+          receive do
+            :go ->
+              register(IO, IOStub)
+              result = i(IO).read!("example.txt")
+              send(test_pid, result)
+          end
+        end)
+
+      pid2 =
+        spawn(fn ->
+          receive do
+            :go ->
+              register(ExampleModule, StubModule2)
+              result = i(ExampleModule).hello()
+              send(test_pid, result)
+          end
+        end)
+
+      send(pid1, :go)
+      send(pid2, :go)
+
+      assert_receive "file contents"
       assert_receive "stubbed2"
     end
   end
