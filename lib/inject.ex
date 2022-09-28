@@ -8,19 +8,21 @@ defmodule Inject do
     :ok
   end
 
-  def i(mod) do
-    inject(mod)
-  end
-
-  def inject(mod) do
+  defmacro inject(mod) do
     if Application.get_env(:inject, :disabled) do
       mod
     else
-      Inject.Registry
-      |> Registry.lookup(mod)
-      |> Enum.reverse()
-      |> find_override() || mod
+      quote bind_quoted: [mod: mod] do
+        Inject.Registry
+        |> Registry.lookup(mod)
+        |> Enum.reverse()
+        |> find_override() || mod
+      end
     end
+  end
+
+  def i(mod) do
+    inject(mod)
   end
 
   defp find_override([]), do: nil
