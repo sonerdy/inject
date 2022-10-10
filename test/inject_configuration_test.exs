@@ -19,7 +19,7 @@ defmodule InjectConfigurationTest do
     test "it does not lookup modules in the registry" do
       register(ExampleModule, StubModule)
       Application.put_env(:inject, :disabled, true)
-      assert "unstubbed" = i(ExampleModule).hello()
+      assert {"unstubbed", []} = Code.eval_quoted(quote(do: inject_module(ExampleModule).hello()))
       Application.put_env(:inject, :disabled, false)
     end
   end
