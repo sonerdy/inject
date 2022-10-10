@@ -8,7 +8,7 @@ defmodule Inject do
     :ok
   end
 
-  defmacro inject(mod) do
+  defmacro inject_module(mod) do
     if Application.get_env(:inject, :disabled) do
       mod
     else
@@ -23,6 +23,10 @@ defmodule Inject do
 
   def i(mod) do
     inject(mod)
+  end
+
+  def inject(mod) do
+    inject_module(mod)
   end
 
   defp find_override([]), do: nil
