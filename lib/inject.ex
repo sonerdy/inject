@@ -25,11 +25,21 @@ defmodule Inject do
 
   defp find_override([]), do: nil
 
-  defp find_override([{pid, {override, shared: shared}} | overrides]) do
-    if pid == self() || shared do
-      override
-    else
-      find_override(overrides)
+  defp find_override(overrides) do
+    process_override = Enum.find(overrides, fn {pid, _} -> pid == self() end)
+
+    case process_override do
+      {_, {override, _}} ->
+        override
+
+      nil ->
+        shared_override =
+          Enum.find(overrides, fn {_, {_, [shared: shared]}} -> shared == true end)
+
+        case shared_override do
+          {_, {override, _}} -> override
+          nil -> nil
+        end
     end
   end
 end
