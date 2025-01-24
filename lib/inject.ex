@@ -27,16 +27,15 @@ defmodule Inject do
 
   defp find_override(overrides) do
     overrides
-    |> Enum.reduce_while(nil, fn {pid, {override, [shared: shared]}}, acc ->
-      if pid == self() do
+    |> Enum.reduce_while(nil, fn
+      {pid, {override, _}}, _acc when pid == self() ->
         {:halt, override}
-      else
-        if shared and acc == nil do
-          {:cont, override}
-        else
-          {:cont, acc}
-        end
-      end
+
+      {_, {override, [shared: true]}}, nil ->
+        {:cont, override}
+
+      _, acc ->
+        {:cont, acc}
     end)
     |> case do
       nil -> nil
