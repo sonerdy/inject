@@ -7,12 +7,13 @@ Inject is a library that lets you write testable Elixir code that can run concur
 ```elixir
 def deps do
   [
-    {:inject, "~> 0.4.0"}
+    {:inject, "~> 0.4.1"}
   ]
 end
 ```
 
 It is recommended to disable inject in prod.exs to avoid any performance penalty for registry lookups.
+
 ```
 config :inject, disabled: true
 ```
@@ -53,6 +54,7 @@ defmodule MyApplicationTest do
   end
 end
 ```
+
 Defining stubbed modules like this is great, but I like to pair Inject w/ [Double](https://hex.pm/packages/double) for on-the-fly setups.
 
 ```elixir
@@ -69,6 +71,7 @@ end
 ```
 
 ### Shared Mode
+
 If you want to inject a dependency that will be shared by all processes, you can do so by passing the `shared: true` option.
 This can be useful if you have background processing. This is only recommended for tests that do not run async.
 
@@ -77,4 +80,5 @@ register(File, FileStub, shared: true)
 ```
 
 ## TODO
+
 - Add `allow/1` for enabling another process to use registrations from the current test.
