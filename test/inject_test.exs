@@ -153,7 +153,6 @@ defmodule InjectTest do
 
   describe "when a shared override is registered in another process after a local override" do
     test "the local override is used in the original process" do
-      test_pid = self()
       register(ExampleModule, StubModule2)
 
       Task.async(fn ->
