@@ -37,9 +37,5 @@ defmodule Inject do
       _, acc ->
         {:cont, acc}
     end)
-    |> case do
-      nil -> nil
-      override -> override
-    end
   end
 end
